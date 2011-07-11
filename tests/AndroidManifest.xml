@@ -15,8 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.calendarcommon.tests"
-        android:sharedUserId="com.android.uid.test">
+        package="com.android.calendarcommon.tests">
 
     <application>
         <uses-library android:name="android.test.runner" />

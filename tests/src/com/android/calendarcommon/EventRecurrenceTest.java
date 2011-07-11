@@ -28,8 +28,8 @@ import java.util.Arrays;
 /**
  * Test android.pim.EventRecurrence.
  *
- * adb shell am instrument -w -e class android.pim.EventRecurrenceTest \
- *   com.android.frameworks.coretests/android.test.InstrumentationTestRunner
+ * adb shell am instrument -w -e class com.android.calendarcommon.EventRecurrenceTest \
+ *   com.android.calendarcommon.tests/android.test.InstrumentationTestRunner
  */
 public class EventRecurrenceTest extends TestCase {
 
