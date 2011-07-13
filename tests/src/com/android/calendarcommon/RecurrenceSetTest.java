@@ -59,6 +59,50 @@ public class RecurrenceSetTest extends TestCase {
                 null, null, 1250812800000L, "UTC",  "P2D", 1);
     }
 
+    // Test multi-rule RRULE.
+    @SmallTest
+    public void testRecurrenceSet3() throws Exception {
+        String recurrence = "DTSTART;VALUE=DATE:20090821\n"
+                + "RRULE:FREQ=YEARLY;WKST=SU\n"
+                + "RRULE:FREQ=MONTHLY;COUNT=3\n"
+                + "DURATION:P2H";
+        verifyPopulateContentValues(recurrence, "FREQ=YEARLY;WKST=SU\nFREQ=MONTHLY;COUNT=3", null,
+                null, null, 1250812800000L, "UTC", "P2H", 1 /*allDay*/);
+        // allDay=1 just means the start time is 00:00:00 UTC.
+    }
+
+    // Test RDATE with VALUE=DATE.
+    @SmallTest
+    public void testRecurrenceSet4() throws Exception {
+        String recurrence = "DTSTART;TZID=America/Los_Angeles:20090821T010203\n"
+                + "RDATE;TZID=America/Los_Angeles;VALUE=DATE:20110601,20110602,20110603\n"
+                + "DURATION:P2H";
+        verifyPopulateContentValues(recurrence, null,
+                //"TZID=America/Los_Angeles;VALUE=DATE:20110601,20110602,20110603",
+                "America/Los_Angeles;20110601,20110602,20110603", // incorrect
+                null, null, 1250841723000L, "America/Los_Angeles", "P2H", 0 /*allDay*/);
+        // allDay=1 just means the start time is 00:00:00 UTC.
+    }
+
+    // Check generation of duration from events in different time zones.
+    @SmallTest
+    public void testRecurrenceSet5() throws Exception {
+        String recurrence = "DTSTART;TZID=America/Los_Angeles:20090821T070000\n"
+                + "DTEND;TZID=America/New_York:20090821T110000\n"
+                + "RRULE:FREQ=YEARLY\n";
+        verifyPopulateContentValues(recurrence, "FREQ=YEARLY", null,
+                null, null, 1250863200000L, "America/Los_Angeles", "P3600S" /*P1H*/, 0 /*allDay*/);
+        // TODO: would like to use P1H for duration
+
+        String recurrence2 = "DTSTART;TZID=America/New_York:20090821T100000\n"
+            + "DTEND;TZID=America/Los_Angeles:20090821T080000\n"
+            + "RRULE:FREQ=YEARLY\n";
+        verifyPopulateContentValues(recurrence, "FREQ=YEARLY", null,
+                null, null, 1250863200000L, "America/Los_Angeles", "P3600S" /*P1H*/, 0 /*allDay*/);
+        // TODO: should we rigorously define which tzid becomes the "event timezone"?
+    }
+
+
     // run populateContentValues and verify the results
     private void verifyPopulateContentValues(String recurrence, String rrule, String rdate,
             String exrule, String exdate, long dtstart, String tzid, String duration, int allDay)

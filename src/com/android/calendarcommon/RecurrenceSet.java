@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
  */
 public class RecurrenceSet {
 
-    private final static String TAG = "CalendarProvider";
+    private final static String TAG = "RecurrenceSet";
 
     private final static String RULE_SEPARATOR = "\n";
     private final static String FOLDING_SEPARATOR = "\n ";
@@ -185,7 +185,7 @@ public class RecurrenceSet {
         if (inUtc || allDay) {
             tzid = Time.TIMEZONE_UTC;
         }
-                
+
         String duration = computeDuration(start, component);
         String rrule = flattenProperties(component, "RRULE");
         String rdate = extractDates(component.getFirstProperty("RDATE"));
@@ -203,7 +203,7 @@ public class RecurrenceSet {
                 }
                 return false;
         }
-        
+
         if (allDay) {
             start.timezone = Time.TIMEZONE_UTC;
         }
@@ -215,7 +215,7 @@ public class RecurrenceSet {
             }
             return false;
         }
-        
+
         values.put(CalendarContract.Events.RRULE, rrule);
         values.put(CalendarContract.Events.RDATE, rdate);
         values.put(CalendarContract.Events.EXRULE, exrule);
@@ -229,7 +229,7 @@ public class RecurrenceSet {
     // This can be removed when the old CalendarSyncAdapter is removed.
     public static boolean populateComponent(Cursor cursor,
                                             ICalendar.Component component) {
-        
+
         int dtstartColumn = cursor.getColumnIndex(CalendarContract.Events.DTSTART);
         int durationColumn = cursor.getColumnIndex(CalendarContract.Events.DURATION);
         int tzidColumn = cursor.getColumnIndex(CalendarContract.Events.EVENT_TIMEZONE);
@@ -271,7 +271,7 @@ public class RecurrenceSet {
             // use the "floating" timezone
             dtstartTime = new Time(Time.TIMEZONE_UTC);
         }
-        
+
         dtstartTime.set(dtstart);
         // make sure the time is printed just as a date, if all day.
         // TODO: android.pim.Time really should take care of this for us.
@@ -435,7 +435,7 @@ public static boolean populateComponent(ContentValues values,
         prop.setValue(dateStr);
         component.addProperty(prop);
     }
-    
+
     private static String computeDuration(Time start,
                                           ICalendar.Component component) {
         // see if a duration is defined
