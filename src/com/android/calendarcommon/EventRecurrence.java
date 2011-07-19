@@ -551,6 +551,8 @@ public class EventRecurrence {
          *       ( ";" x-name "=" text )
          *       )
          *
+         *  The rule parts are not ordered in any particular sequence.
+         *
          * Examples:
          *   FREQ=MONTHLY;INTERVAL=2;COUNT=10;BYDAY=1SU,-1SU
          *   FREQ=YEARLY;INTERVAL=4;BYMONTH=11;BYDAY=TU;BYMONTHDAY=2,3,4,5,6,7,8
@@ -619,9 +621,6 @@ public class EventRecurrence {
                 int flag = parser.parsePart(rhs, this);
                 if ((parseFlags & flag) != 0) {
                     throw new InvalidFormatException("Part " + lhs + " was specified twice");
-                }
-                if (parseFlags == 0 && flag != PARSED_FREQ) {
-                    throw new InvalidFormatException("FREQ must be specified first");
                 }
                 parseFlags |= flag;
             }

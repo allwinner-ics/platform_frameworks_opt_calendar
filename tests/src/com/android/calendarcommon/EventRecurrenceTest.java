@@ -711,19 +711,20 @@ public class EventRecurrenceTest extends TestCase {
         "FREQ=SECONDLY;BYSECOND=0,15,59",
         "FREQ=MINUTELY;BYMINUTE=0,15,59",
         "FREQ=HOURLY;BYHOUR=+0,+15,+23",
-        "FREQ=DAILY;X-WHATEVER=blah",                       // fails on old parser
-        //"freq=daily;wkst=su",                               // fails on old parser
+        "INTERVAL=4;FREQ=YEARLY",
+        "FREQ=DAILY;X-WHATEVER=blah",
+        //"freq=daily;wkst=su",                               // mixed case currently not allowed
     };
 
     /** The parser must reject these. */
     private static final String[] BAD_RRULES = {
-        "INTERVAL=4;FREQ=YEARLY",                           // FREQ must come first
         "FREQ=MONTHLY;FREQ=MONTHLY",                        // can't specify twice
         "FREQ=MONTHLY;COUNT=1;COUNT=1",                     // can't specify twice
         "FREQ=SECONDLY;BYSECOND=60",                        // range
         "FREQ=MINUTELY;BYMINUTE=-1",                        // range
         "FREQ=HOURLY;BYHOUR=24",                            // range
         "FREQ=YEARLY;BYMONTHDAY=0",                         // zero not valid
+        "BYMONTHDAY=1",                                     // must specify FREQ
         //"FREQ=YEARLY;COUNT=1;UNTIL=12345",                  // can't have both COUNT and UNTIL
         //"FREQ=DAILY;UNTIL=19970829T021400e",                // invalid date
     };
