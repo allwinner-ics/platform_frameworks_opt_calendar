@@ -279,12 +279,114 @@ byday:
                 return 8;
             }
         }
-        // BYSETPOS -- we might have to do this by postprocessing
-        // the list
+
+        if (r.bysetposCount > 0) {
+bysetpos:
+            // BYSETPOS - we only handle rules like FREQ=MONTHLY;BYDAY=MO,TU,WE,TH,FR;BYSETPOS=-1
+            if (freq == EventRecurrence.MONTHLY && r.bydayCount > 0) {
+                // Check for stuff like BYDAY=1TU
+                for (int i = r.bydayCount - 1; i >= 0; i--) {
+                    if (r.bydayNum[i] != 0) {
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            Log.v(TAG, "BYSETPOS not supported with these rules: " + r);
+                        }
+                        break bysetpos;
+                    }
+                }
+                if (!filterMonthlySetPos(r, iterator)) {
+                    // Not allowed, filter it out.
+                    return 9;
+                }
+            } else {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "BYSETPOS not supported with these rules: " + r);
+                }
+            }
+            // BYSETPOS was defined but we don't know how to handle it.  Do no filtering based
+            // on it.
+        }
 
         // if we got to here, we didn't filter it out
         return 0;
     }
+
+    /**
+     * Filters out instances that don't match the BYSETPOS clause of a monthly recurrence rule.
+     * This is an awkward and inefficient way to go about it.
+     *
+     * @returns true if this instance should be kept
+     */
+    private static boolean filterMonthlySetPos(EventRecurrence r, Time instance) {
+        /*
+         * Compute the day of the week for the first day of the month.  "instance" has a
+         * day number and a DotW, so we compute the DotW of the 1st from that.  Note DotW
+         * is 0-6, where 0=SUNDAY.
+         *
+         * The basic calculation is to take the instance's "day of the week" number, subtract
+         * (day of the month - 1) mod 7, and then make sure it's positive.  We can simplify
+         * that with some algebra.
+         */
+        int dotw = (instance.weekDay - instance.monthDay + 36) % 7;
+
+        /*
+         * The byday[] values are specified as bits, so we can just OR them all
+         * together.
+         */
+        int bydayMask = 0;
+        for (int i = 0; i < r.bydayCount; i++) {
+            bydayMask |= r.byday[i];
+        }
+
+        /*
+         * Generate a set according to the BYDAY rules.  For each day of the month, determine
+         * if its day of the week is included.  If so, append it to the day set.
+         */
+        int maxDay = instance.getActualMaximum(Time.MONTH_DAY);
+        int daySet[] = new int[maxDay];
+        int daySetLength = 0;
+
+        for (int md = 1; md <= maxDay; md++) {
+            // For each month day, see if it's part of the set.  (This makes some assumptions
+            // about the exact form of the DotW constants.)
+            int dayBit = EventRecurrence.SU << dotw;
+            if ((bydayMask & dayBit) != 0) {
+                daySet[daySetLength++] = md;
+            }
+
+            dotw++;
+            if (dotw == 7)
+                dotw = 0;
+        }
+
+        /*
+         * Now walk through the BYSETPOS list and see if the instance is equal to any of the
+         * specified daySet entries.
+         */
+        for (int i = r.bysetposCount - 1; i >= 0; i--) {
+            int index = r.bysetpos[i];
+            if (index > 0) {
+                if (index > daySetLength) {
+                    continue;  // out of range
+                }
+                if (daySet[index-1] == instance.monthDay) {
+                    return true;
+                }
+            } else if (index < 0) {
+                if (daySetLength + index < 0) {
+                    continue;  // out of range
+                }
+                if (daySet[daySetLength + index] == instance.monthDay) {
+                    return true;
+                }
+            } else {
+                // should have been caught by parser
+                throw new RuntimeException("invalid bysetpos value");
+            }
+        }
+
+        return false;
+    }
+
 
     private static final int USE_ITERATOR = 0;
     private static final int USE_BYLIST = 1;
@@ -644,6 +746,10 @@ byday:
         // then don't add it here.  In that case, count will be incremented later
         // inside  the loop.  It is important that count gets incremented exactly
         // once here or in the loop for dtstart.
+        //
+        // TODO: this is only correct if DTSTART is synchronized with the recurrence rule.
+        //       If e.g. DSTART is 2011/07/01 (a Friday), and the rule includes only "BYDAY=SA,SU",
+        //       this will insert an incorrect entry.  (Why is this being done?)
         if (add && dtstartDateValue >= rangeStartDateValue
                 && dtstartDateValue < rangeEndDateValue) {
             out.add(dtstartDateValue);
@@ -861,6 +967,9 @@ byday:
                                         // but Google Calendar doesn't seem to always do this.
                                         if (genDateValue >= dtstartDateValue) {
                                             // filter and then add
+                                            // TODO: we don't check for stop conditions (like
+                                            //       passing the "end" date) unless the filter
+                                            //       allows the event.  Could stop sooner.
                                             int filtered = filter(r, generated);
                                             if (0 == filtered) {
 

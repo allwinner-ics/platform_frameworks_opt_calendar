@@ -378,7 +378,7 @@ public class RecurrenceProcessorTest extends TestCase {
                 null /* rdate */, null /* exrule */, null /* exdate */,
                 "20060101T000000", "20101231T000000",
                 new String[]{
-                        "20060101T100000",
+                        "20060101T100000",  // TODO: this is wrong (bug in recurrence gen)
                         "20060113T100000",
                         "20061013T100000",
                         "20070413T100000",
@@ -388,6 +388,36 @@ public class RecurrenceProcessorTest extends TestCase {
                         "20090313T100000",
                         "20091113T100000",
                         "20100813T100000",
+                });
+    }
+
+    @SmallTest
+    public void testMonthly14() throws Exception {
+        verifyRecurrence("20110103T100000", "FREQ=MONTHLY;BYDAY=MO,TU,WE,TH,FR;BYSETPOS=1,-1",
+                null /* rdate */, null /* exrule */, null /* exdate */,
+                "20110101T000000", "20110331T235959",
+                new String[]{
+                "20110103T100000",
+                "20110131T100000",
+                "20110201T100000",
+                "20110228T100000",
+                "20110301T100000",
+                "20110331T100000",
+                });
+    }
+
+    @SmallTest
+    public void testMonthly15() throws Exception {
+        verifyRecurrence("20110703T100000", "FREQ=MONTHLY;BYDAY=SA,SU;BYSETPOS=2,-2",
+                null /* rdate */, null /* exrule */, null /* exdate */,
+                "20110701T000000", "20110931T235959",
+                new String[]{
+                "20110703T100000",
+                "20110730T100000",
+                "20110807T100000",
+                "20110827T100000",
+                "20110904T100000",
+                "20110924T100000",
                 });
     }
 
