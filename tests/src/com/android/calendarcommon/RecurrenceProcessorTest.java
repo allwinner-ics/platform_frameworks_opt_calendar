@@ -378,7 +378,7 @@ public class RecurrenceProcessorTest extends TestCase {
                 null /* rdate */, null /* exrule */, null /* exdate */,
                 "20060101T000000", "20101231T000000",
                 new String[]{
-                        "20060101T100000",  // TODO: this is wrong (bug in recurrence gen)
+                        "20060101T100000",
                         "20060113T100000",
                         "20061013T100000",
                         "20070413T100000",

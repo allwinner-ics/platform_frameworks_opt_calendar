@@ -747,9 +747,8 @@ bysetpos:
         // inside  the loop.  It is important that count gets incremented exactly
         // once here or in the loop for dtstart.
         //
-        // TODO: this is only correct if DTSTART is synchronized with the recurrence rule.
-        //       If e.g. DSTART is 2011/07/01 (a Friday), and the rule includes only "BYDAY=SA,SU",
-        //       this will insert an incorrect entry.  (Why is this being done?)
+        // NOTE: if DTSTART is not synchronized with the recurrence rule, the first instance
+        //       we return will not fit the RRULE pattern.
         if (add && dtstartDateValue >= rangeStartDateValue
                 && dtstartDateValue < rangeEndDateValue) {
             out.add(dtstartDateValue);
