@@ -22,6 +22,7 @@ import android.provider.CalendarContract;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.Log;
+import android.util.TimeFormatException;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -134,7 +135,8 @@ public class RecurrenceSet {
      * @param recurrence The recurrence to be parsed.
      * @return The list of date/times.
      */
-    public static long[] parseRecurrenceDates(String recurrence) {
+    public static long[] parseRecurrenceDates(String recurrence)
+            throws EventRecurrence.InvalidFormatException{
         // TODO: use "local" time as the default.  will need to handle times
         // that end in "z" (UTC time) explicitly at that point.
         String tz = Time.TIMEZONE_UTC;
@@ -149,7 +151,14 @@ public class RecurrenceSet {
         long[] dates = new long[n];
         for (int i = 0; i<n; ++i) {
             // The timezone is updated to UTC if the time string specified 'Z'.
-            time.parse(rawDates[i]);
+            try {
+                time.parse(rawDates[i]);
+            } catch (TimeFormatException e) {
+                throw new EventRecurrence.InvalidFormatException(
+                        "TimeFormatException thrown when parsing time " + rawDates[i]
+                                + " in recurrence " + recurrence);
+
+            }
             dates[i] = time.toMillis(false /* use isDst */);
             time.timezone = tz;
         }
