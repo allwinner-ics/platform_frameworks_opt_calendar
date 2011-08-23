@@ -17,7 +17,9 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_MODULE := calendar-common
 LOCAL_SDK_VERSION := current
-LOCAL_SRC_FILES := $(call all-java-files-under, src)
+LOCAL_SRC_FILES := \
+    $(call all-java-files-under, src) \
+    $(call all-java-files-under, ../../../external/libphonenumber/java/src)
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
 # Build the test package
